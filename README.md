@@ -54,7 +54,7 @@ sudo xbps-install -S coreutils util-linux fzf
 ### macOS
 
 ```sh
-brew install coreutils util-linux fzf
+brew install fzf
 ```
 
 ## Usage
