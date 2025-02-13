@@ -5,9 +5,11 @@
 ## Requirements
 
 - `bash`
-- `lsblk`
+- `lsblk` (Linux)
+- `diskutil` (macOS)
 - `dd`
 - `sync`
+- `fzf`
 
 ## Installation
 
@@ -15,38 +17,44 @@
 
 ```sh
 sudo apt update
-sudo apt install coreutils util-linux
+sudo apt install coreutils util-linux fzf
 ```
 
 ### Fedora
 
 ```sh
-sudo dnf install coreutils util-linux
+sudo dnf install coreutils util-linux fzf
 ```
 
 ### Arch Linux
 
 ```sh
-sudo pacman -S coreutils util-linux
+sudo pacman -S coreutils util-linux fzf
 ```
 
 ### Gentoo
 
 ```sh
-sudo emerge sys-apps/coreutils sys-apps/util-linux
+sudo emerge sys-apps/coreutils sys-apps/util-linux fzf
 ```
 
 ### Termux
 
 ```sh
 pkg update
-pkg install coreutils util-linux
+pkg install coreutils util-linux fzf
 ```
 
 ### Void Linux
 
 ```sh
-sudo xbps-install -S coreutils util-linux
+sudo xbps-install -S coreutils util-linux fzf
+```
+
+### macOS
+
+```sh
+brew install coreutils util-linux fzf
 ```
 
 ## Usage
