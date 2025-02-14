@@ -15,7 +15,7 @@ trap handle_sigint SIGINT
 
 echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 echo "! dd-flasher -- A simple script to flash ISO/IMG files to USB drives using dd command. !"
-echo "! v1.0.0                                                                               !"
+echo "! v1.1.0                                                                               !"
 echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 echo ""
 
@@ -32,9 +32,24 @@ echo ""
 sleep 2
 clear
 
+# Check for disk_images directory
+if [ ! -d "disk_image" ]; then
+  mkdir disk_image
+  echo "directory created."
+  sleep 1.5
+fi
+
+# validate content of disk_image directory
+if [ -z "$(ls -A disk_image/*.iso 2>/dev/null)" ] && [ -z "$(ls -A disk_image/*.img 2>/dev/null)" ]; then
+  echo "[ERROR] No ISO/IMG files found"
+  sleep 1.5
+  exit 1
+fi
+
 # Check for fzf installation
 if ! command -v fzf &>/dev/null; then
-  echo "fzf is required but not installed. Install it first."
+  echo "[ERROR] fzf is not installed."
+  sleep 1.5
   exit 1
 fi
 
@@ -44,7 +59,8 @@ HISTORY_FILE="./flash_history"
 # Function to display history
 display_history() {
   if [ -f "$HISTORY_FILE" ]; then
-    echo "Previous operations:"
+    echo "Your flash history:"
+    echo ""
     cat "$HISTORY_FILE"
     echo ""
   else
@@ -55,39 +71,44 @@ display_history() {
 
 # Display history
 display_history
-
 sleep 2
+clear
 
 # Input ISO/IMG file
-echo "Select ISO/IMG file:"
 if command -v fzf &>/dev/null; then
-  ISO_FILE=$(find ./disk_image -type f \( -iname "*.iso" -o -iname "*.img" \) 2>/dev/null | fzf --prompt="Select ISO/IMG file: " --height=40% --border)
+  ISO_FILE=$(find ./disk_image -type f \( -iname "*.iso" -o -iname "*.img" \) 2>/dev/null | fzf --prompt="Select ISO/IMG file: " --height=100% --border)
 else
-  echo "[ERROR] No suitable command found for file selection (fzf)."
+  echo "[ERROR] No suitable command found"
+  sleep 1.5
   exit 1
 fi
+clear
 
 # Validate file
 if [ ! -f "$ISO_FILE" ]; then
   echo "[ERROR] File not found: $ISO_FILE"
+  sleep 1.5
   exit 1
 fi
+clear
 
 # Input target device
-echo "Select target device:"
 if command -v lsblk &>/dev/null; then
-  target_dev=$(lsblk -dpno NAME -e7 | fzf --prompt="Select Target Device: " --height=40% --border)
+  target_dev=$(lsblk -dpno NAME -e7 | fzf --prompt="Select Target Device: " --height=100% --border)
 elif command -v diskutil &>/dev/null; then
   target_dev=$(diskutil list | grep "/dev/" | fzf | awk '{print $1}')
   diskutil info "$target_dev"
 else
   echo "[ERROR] No suitable command found to list drives."
+  sleep 1.5
   exit 1
 fi
+clear
 
 # Validate target device
 if [ ! -b "$target_dev" ]; then
   echo "[ERROR] Selected target is not a valid block device: $target_dev"
+  sleep 1.5
   exit 1
 fi
 clear
@@ -106,6 +127,7 @@ if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
   echo "Cancelled"
   exit 0
 fi
+clear
 
 # Execute dd
 echo ""
@@ -123,15 +145,15 @@ wait "$dd_pid"
 #   echo "[ERROR] Flashing process failed."
 # fi
 
-# Tambahkan header jika file history belum ada
+# Add Header to history file if not exists
 if [ ! -f "$HISTORY_FILE" ]; then
   printf "%-12s | %-8s | %-10s | %-50s\n" "Date" "Time" "Partition" "Image File" >"$HISTORY_FILE"
   echo "------------------------------------------------" >>"$HISTORY_FILE"
 fi
 
-# Format tanggal dan waktu
+# Format date and time
 CURRENT_DATE=$(date "+%m/%d/%Y")  # Format: MM/DD/YYYY
 CURRENT_TIME=$(date "+%-I:%M %p") # Format: H:MM AM/PM
 
-# Simpan ke history dengan format yang rapi
+# Save history
 printf "%-12s | %-8s | %-10s | %-50s\n" "$CURRENT_DATE" "$CURRENT_TIME" "$target_dev" "$ISO_FILE" >>"$HISTORY_FILE"
