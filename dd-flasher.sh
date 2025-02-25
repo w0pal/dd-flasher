@@ -94,10 +94,7 @@ clear
 
 # Input target device
 if command -v lsblk &>/dev/null; then
-  target_dev=$(lsblk -dpno NAME -e7 | fzf --prompt="Select Target Device: " --height=100% --border)
-elif command -v diskutil &>/dev/null; then
-  target_dev=$(diskutil list | grep "/dev/" | fzf | awk '{print $1}')
-  diskutil info "$target_dev"
+  target_dev=$(lsblk -dpno NAME -e7 | fzf --prompt="Select Target Device: " --height=40% --border)
 else
   echo "[ERROR] No suitable command found to list drives."
   sleep 1.5
